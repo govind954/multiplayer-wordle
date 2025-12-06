@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Friend Wordle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 40px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 10px;
+            width: 320px;
+            margin: 20px auto;
+        }
+        .tile {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #999;
+            font-size: 30px;
+            line-height: 60px;
+            text-transform: uppercase;
+        }
+        .correct {
+            background-color: #6aaa64; /* green */
+            color: white;
+        }
+        .present {
+            background-color: #c9b458; /* yellow */
+            color: white;
+        }
+        .absent {
+            background-color: #787c7e; /* grey */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Wordle with a Friend</h1>
+
+<h3 id="scoreDisplay">Scores: Wait for players to join...</h3>
+<h3 id="gameStatus"></h3>
+<h2 id="messageDisplay" style="color: red;"></h2> <input id="secretWordInput" placeholder="Set 5 letter secret word">
+<button id="createRoom">Set Word and Start/Next Round</button>
+<br><br>
+
+<input id="roomInput" placeholder="Room Code">
+<button id="joinRoom">Join Room</button>
+
+<h2 id="roomDisplay"></h2>
+
+<div id="board"></div>
+
+<input id="guessInput" placeholder="Type 5 letter guess">
+<button id="guessBtn">Guess</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+
+</body>
+</html>

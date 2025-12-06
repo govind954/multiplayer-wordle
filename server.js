@@ -1,0 +1,164 @@
+const express = require("express");
+const app = express();
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
+
+app.use(express.static("public"));
+
+let rooms = {};
+
+function generateCode() {
+    return Math.random().toString(36).substring(2, 7).toUpperCase();
+}
+
+function wordleFeedback(guess, correct) {
+    let result = Array(5).fill("absent");
+    let used = {};
+
+    for (let i = 0; i < 5; i++) {
+        if (guess[i] === correct[i]) {
+            result[i] = "correct";
+            used[i] = true;
+        }
+    }
+    for (let i = 0; i < 5; i++) {
+        if (result[i] === "correct") continue;
+        for (let j = 0; j < 5; j++) {
+            if (!used[j] && guess[i] === correct[j]) {
+                result[i] = "present";
+                used[j] = true;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+io.on("connection", (socket) => {
+    let socketId = socket.id;
+
+    socket.on("createRoom", (secretWord) => {
+        const code = generateCode();
+        rooms[code] = { 
+            word: secretWord, 
+            players: [socketId],
+            scores: { [socketId]: 0 }, 
+            setterId: socketId, 
+            guesserId: null,
+            guessCount: 0
+        }; 
+        socket.join(code);
+        socket.emit("roomCreated", code, socketId);
+    });
+
+    socket.on("joinRoom", (code) => {
+        if (rooms[code]) {
+            let roomData = rooms[code];
+            
+            if (roomData.players.length >= 2) {
+                return socket.emit("roomFull"); 
+            }
+
+            roomData.players.push(socketId);
+            roomData.scores[socketId] = 0;
+            roomData.guesserId = socketId; 
+            
+            socket.join(code);
+            socket.emit("joinedRoom", code, socketId);
+            
+            io.to(code).emit("gameStart", { 
+                setter: roomData.setterId, 
+                guesser: roomData.guesserId 
+            });
+        } else {
+            socket.emit("roomNotFound");
+        }
+    });
+    
+    // Handler for the next round's word setting
+    socket.on("setNextWord", ({ room, secretWord }) => {
+        const roomData = rooms[room];
+        if (roomData && socketId === roomData.setterId) {
+            // Check if a word is already set
+            if (roomData.word !== null) {
+                return socket.emit("errorMsg", "A word is already set for this round!");
+            }
+            
+            roomData.word = secretWord;
+            roomData.guessCount = 0;
+            // Notify all clients that the word is set and the guesser can start
+            io.to(room).emit("wordSet", { setterId: roomData.setterId, newGuesserId: roomData.guesserId });
+        }
+    });
+
+
+    socket.on("guess", ({ room, guess }) => {
+        const roomData = rooms[room];
+        
+        // 1. Check if room/player is valid
+        if (!roomData || socketId !== roomData.guesserId) {
+            return;
+        }
+
+        const correct = roomData.word;
+        
+        // 2. CRITICAL FIX: Check if the word is set (not null)
+        if (!correct) {
+            socket.emit("errorMsg", "The secret word has not been set for this round yet.");
+            return;
+        }
+        
+        const feedback = wordleFeedback(guess, correct);
+        
+        const isCorrect = guess === correct;
+        roomData.guessCount++;
+        
+        io.to(room).emit("result", { guess, feedback, isCorrect });
+
+        if (isCorrect || roomData.guessCount >= 6) {
+            
+            // GAME OVER LOGIC
+            let winnerId = null;
+            if (isCorrect) {
+                // Scoring: 6 points for guess 1, 1 point for guess 6
+                roomData.scores[socketId] += (7 - roomData.guessCount);
+                winnerId = socketId;
+            }
+
+            // Determine next turn: roles flip
+            const newSetterId = roomData.guesserId; 
+            const newGuesserId = roomData.setterId; 
+
+            // Reset room state for the next turn
+            roomData.setterId = newSetterId;
+            roomData.guesserId = newGuesserId;
+            roomData.word = null; // Forces the new setter to input a word
+
+            io.to(room).emit("gameOver", { 
+                winnerId: winnerId, 
+                newSetterId: newSetterId,
+                scores: roomData.scores,
+                lostOnGuessCount: roomData.guessCount >= 6 && !isCorrect
+            });
+        }
+    });
+    
+    socket.on('disconnect', () => {
+        for (const code in rooms) {
+            const index = rooms[code].players.indexOf(socketId);
+            if (index > -1) {
+                rooms[code].players.splice(index, 1);
+                if (rooms[code].players.length === 0) {
+                    delete rooms[code];
+                } else {
+                    io.to(code).emit("opponentLeft");
+                }
+            }
+        }
+    });
+
+});
+
+// 🌟 FIX: Listen on the port provided by the hosting environment (process.env.PORT)
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => console.log(`Running on ${PORT}`));

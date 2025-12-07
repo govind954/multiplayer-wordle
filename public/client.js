@@ -290,6 +290,26 @@ socket.on("gameOver", ({ winnerId, newSetterId, scores, usernames: newUsers, los
         updateGameUI(false); // Prepare new setter
     }, 2000); 
 });
+// --- Socket Event Listener (Add this to your client.js) ---
+
+// ... (other socket listeners)
+
+socket.on("invalidGuess", () => {
+    displayMessage("Not in word list!", 2000);
+    const board = document.querySelectorAll(".tile");
+    const startTileIndex = currentRow * MAX_WORD_LENGTH;
+
+    for (let i = 0; i < MAX_WORD_LENGTH; i++) {
+        const tile = board[startTileIndex + i];
+        tile.classList.add('shake');
+        // Remove the shake class after the animation finishes
+        tile.addEventListener('animationend', () => {
+            tile.classList.remove('shake');
+        }, { once: true });
+    }
+});
+
+// ... (rest of your client.js)
 
 socket.on("errorMsg", (message) => displayMessage("Error: " + message)); 
 socket.on("roomNotFound", () => displayMessage("Room not found. Check the code.")); 

@@ -3,6 +3,7 @@
 <head>
     <title>Wordle Duel</title>
     <style>
+        /* GLOBAL STYLES */
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
@@ -14,6 +15,7 @@
             color: #202020;
             margin-bottom: 10px;
         }
+        /* HEADER CONTAINER */
         #header-container {
             width: 90%;
             max-width: 600px;
@@ -41,14 +43,15 @@
         }
         #gameStatus {
             text-align: right;
-            color: #007bff; /* Blue status color */
+            color: #007bff;
         }
         #messageDisplay {
-            color: #dc3545; /* Red error messages */
+            color: #dc3545;
             font-weight: bold;
             min-height: 20px;
             margin-bottom: 10px;
         }
+        /* GAME BOARD */
         #board {
             display: grid;
             grid-template-columns: repeat(5, 60px);
@@ -68,8 +71,9 @@
             line-height: 60px;
             text-transform: uppercase;
             font-weight: bold;
-            transition: background-color 0.5s;
+            transition: background-color 0.5s, transform 0.2s;
         }
+        /* COLOR CLASSES (Used for both Tiles and Keyboard) */
         .correct {
             background-color: #6aaa64; /* green */
             border-color: #6aaa64;
@@ -85,6 +89,7 @@
             border-color: #787c7e;
             color: white;
         }
+        /* CONTROLS */
         input, button {
             padding: 8px 12px;
             margin: 5px;
@@ -101,6 +106,35 @@
         button:disabled {
             background-color: #adb5bd;
             cursor: not-allowed;
+        }
+
+        /* VIRTUAL KEYBOARD STYLES */
+        #keyboard {
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .key {
+            background-color: #d3d6da;
+            color: black;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 0;
+            margin: 0 3px;
+            cursor: pointer;
+            flex-grow: 1;
+            text-transform: uppercase;
+            max-width: 40px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .key.big {
+            max-width: 60px; /* Wider for Enter/Delete */
         }
     </style>
 </head>
@@ -121,18 +155,55 @@
 <input id="usernameInput" placeholder="Enter Your Username (REQUIRED)">
 <br>
 
-<input id="secretWordInput" placeholder="Set 5 letter secret word">
+<input id="secretWordInput" placeholder="Set 5 letter secret word" maxlength="5">
 <button id="createRoomBtn">Set Word and Create/Next Round</button>
 <br>
 
-<input id="roomInput" placeholder="Room Code">
+<input id="roomInput" placeholder="Room Code" maxlength="5">
 <button id="joinRoomBtn">Join Room</button>
 
 <div id="board"></div>
 
-<input id="guessInput" placeholder="Type 5 letter guess">
-<button id="guessBtn">Guess</button>
+<input id="guessInput" type="hidden"> 
+<button id="guessBtn" style="display:none;">Guess</button> 
 
+
+<div id="keyboard">
+    <div class="keyboard-row">
+        <button class="key" data-key="Q">Q</button>
+        <button class="key" data-key="W">W</button>
+        <button class="key" data-key="E">E</button>
+        <button class="key" data-key="R">R</button>
+        <button class="key" data-key="T">T</button>
+        <button class="key" data-key="Y">Y</button>
+        <button class="key" data-key="U">U</button>
+        <button class="key" data-key="I">I</button>
+        <button class="key" data-key="O">O</button>
+        <button class="key" data-key="P">P</button>
+    </div>
+    <div class="keyboard-row">
+        <button class="key" data-key="A">A</button>
+        <button class="key" data-key="S">S</button>
+        <button class="key" data-key="D">D</button>
+        <button class="key" data-key="F">F</button>
+        <button class="key" data-key="G">G</button>
+        <button class="key" data-key="H">H</button>
+        <button class="key" data-key="J">J</button>
+        <button class="key" data-key="K">K</button>
+        <button class="key" data-key="L">L</button>
+    </div>
+    <div class="keyboard-row">
+        <button class="key big" data-key="ENTER">ENTER</button>
+        <button class="key" data-key="Z">Z</button>
+        <button class="key" data-key="X">X</button>
+        <button class="key" data-key="C">C</button>
+        <button class="key" data-key="V">V</button>
+        <button class="key" data-key="B">B</button>
+        <button class="key" data-key="N">N</button>
+        <button class="key" data-key="M">M</button>
+        <button class="key big" data-key="BACKSPACE">DELETE</button>
+    </div>
+</div>
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js"></script>
 

@@ -8,21 +8,21 @@ app.use(express.static("public"));
 let rooms = {};
 let users = {}; // Global user tracking by socket ID
 
-// --- Word List Integration (FIXED) ---
+// --- Word List Integration (ULTIMATE FIX) ---
 let VALID_WORDS = [];
 try {
     const fileContent = fs.readFileSync('valid_words.txt', 'utf8');
     
-    VALID_WORDS = fileContent
-        // 1. Convert to UPPERCASE
-        .toUpperCase()
-        // 2. NEW FIX: Replace ALL carriage returns (\r) with nothing. This ensures clean newlines.
-        .replace(/\r/g, '') 
-        // 3. Split by newline (\n)
-        .split('\n') 
-        // 4. Trim any remaining whitespace (including extra spaces or tabs) and filter to length 5
+    // 1. Convert to UPPERCASE
+    const rawWords = fileContent.toUpperCase();
+    
+    // 2. Aggressively split by any whitespace (spaces, tabs, newlines, carriage returns)
+    // The regex /\s+/ matches one or more whitespace characters.
+    VALID_WORDS = rawWords.split(/\s+/) 
+        // 3. Filter and Trim
         .map(word => word.trim())
-        .filter(word => word.length === 5);
+        // 4. Ensure the word consists ONLY of 5 letters (no hidden characters)
+        .filter(word => word.length === 5 && /^[A-Z]{5}$/.test(word));
     
     console.log(`Loaded ${VALID_WORDS.length} valid 5-letter words.`);
 } catch (error) {
@@ -34,7 +34,7 @@ try {
         "RIVER", "TRAIN", "HOUSE", "GRADE", "SMILE", "QUIET", "BLANK"
     ];
 }
-// ------------------------------------
+// -----------------------------------------------------------------------
 
 function generateCode() {
     return Math.random().toString(36).substring(2, 7).toUpperCase();

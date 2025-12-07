@@ -76,12 +76,12 @@
             transform-style: preserve-3d;
             position: relative;
         }
-        /* TILE ANIMATION KEYFRAMES (THE POLISH) */
+        /* TILE ANIMATION KEYFRAMES */
         .flip-in {
             animation: flipIn 0.3s ease-in forwards;
         }
         .flip-out {
-             animation: flipOut 0.3s 0.3s ease-out forwards; /* 0.3s delay for two-stage flip */
+             animation: flipOut 0.3s 0.3s ease-out forwards;
         }
         @keyframes flipIn {
             0% { transform: rotateX(0deg); }
@@ -169,61 +169,59 @@
     <div id="messageDisplay"></div>
 </div>
 
-
-<input id="usernameInput" placeholder="Enter Your Username (REQUIRED)">
-<br>
-
-<input id="secretWordInput" placeholder="Set 5 letter secret word" maxlength="5">
-<button id="createRoomBtn">Set Word and Create/Next Round</button>
-<br>
-
-<input id="roomInput" placeholder="Room Code" maxlength="5">
-<button id="joinRoomBtn">Join Room</button>
-
-<div id="board"></div>
-
-<input id="guessInput" type="hidden"> 
-<button id="guessBtn" style="display:none;">Guess</button> 
-
-
-<div id="keyboard">
-    <div class="keyboard-row">
-        <button class="key" data-key="Q">Q</button>
-        <button class="key" data-key="W">W</button>
-        <button class="key" data-key="E">E</button>
-        <button class="key" data-key="R">R</button>
-        <button class="key" data-key="T">T</button>
-        <button class="key" data-key="Y">Y</button>
-        <button class="key" data-key="U">U</button>
-        <button class="key" data-key="I">I</button>
-        <button class="key" data-key="O">O</button>
-        <button class="key" data-key="P">P</button>
-    </div>
-    <div class="keyboard-row">
-        <button class="key" data-key="A">A</button>
-        <button class="key" data-key="S">S</button>
-        <button class="key" data-key="D">D</button>
-        <button class="key" data-key="F">F</button>
-        <button class="key" data-key="G">G</button>
-        <button class="key" data-key="H">H</button>
-        <button class="key" data-key="J">J</button>
-        <button class="key" data-key="K">K</button>
-        <button class="key" data-key="L">L</button>
-    </div>
-    <div class="keyboard-row">
-        <button class="key big" data-key="ENTER">ENTER</button>
-        <button class="key" data-key="Z">Z</button>
-        <button class="key" data-key="X">X</button>
-        <button class="key" data-key="C">C</button>
-        <button class="key" data-key="V">V</button>
-        <button class="key" data-key="B">B</button>
-        <button class="key" data-key="N">N</button>
-        <button class="key" data-key="M">M</button>
-        <button class="key big" data-key="BACKSPACE">DELETE</button>
-    </div>
+<div id="lobby-controls">
+    <input id="usernameInput" placeholder="Enter Your Username (REQUIRED)">
+    <br>
+    <input id="secretWordInput" placeholder="Set 5 letter secret word" maxlength="5">
+    <button id="createRoomBtn">Set Word and Create/Next Round</button>
+    <br>
+    <input id="roomInput" placeholder="Room Code" maxlength="5">
+    <button id="joinRoomBtn">Join Room</button>
 </div>
 
+<div id="game-container" style="display:none;"> 
+    <div id="board"></div>
 
+    <input id="guessInput" type="hidden"> 
+    <button id="guessBtn" style="display:none;">Guess</button> 
+
+    <div id="keyboard">
+        <div class="keyboard-row">
+            <button class="key" data-key="Q">Q</button>
+            <button class="key" data-key="W">W</button>
+            <button class="key" data-key="E">E</button>
+            <button class="key" data-key="R">R</button>
+            <button class="key" data-key="T">T</button>
+            <button class="key" data-key="Y">Y</button>
+            <button class="key" data-key="U">U</button>
+            <button class="key" data-key="I">I</button>
+            <button class="key" data-key="O">O</button>
+            <button class="key" data-key="P">P</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key" data-key="A">A</button>
+            <button class="key" data-key="S">S</button>
+            <button class="key" data-key="D">D</button>
+            <button class="key" data-key="F">F</button>
+            <button class="key" data-key="G">G</button>
+            <button class="key" data-key="H">H</button>
+            <button class="key" data-key="J">J</button>
+            <button class="key" data-key="K">K</button>
+            <button class="key" data-key="L">L</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key big" data-key="ENTER">ENTER</button>
+            <button class="key" data-key="Z">Z</button>
+            <button class="key" data-key="X">X</button>
+            <button class="key" data-key="C">C</button>
+            <button class="key" data-key="V">V</button>
+            <button class="key" data-key="B">B</button>
+            <button class="key" data-key="N">N</button>
+            <button class="key" data-key="M">M</button>
+            <button class="key big" data-key="BACKSPACE">DELETE</button>
+        </div>
+    </div>
+</div>
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js"></script>
 

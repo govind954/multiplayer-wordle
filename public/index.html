@@ -1,64 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Friend Wordle</title>
+    <title>Wordle Duel</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            margin-top: 40px;
+            margin: 0;
+            background-color: #f8f8f8;
+            padding-top: 20px;
+        }
+        h1 {
+            color: #202020;
+            margin-bottom: 10px;
+        }
+        #header-container {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #score-status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        #scoreDisplay, #gameStatus {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            flex-grow: 1;
+            text-align: left;
+            padding-left: 10px;
+        }
+        #gameStatus {
+            text-align: right;
+            color: #007bff; /* Blue status color */
+        }
+        #messageDisplay {
+            color: #dc3545; /* Red error messages */
+            font-weight: bold;
+            min-height: 20px;
+            margin-bottom: 10px;
         }
         #board {
             display: grid;
             grid-template-columns: repeat(5, 60px);
-            gap: 10px;
-            width: 320px;
+            gap: 8px;
+            width: fit-content;
             margin: 20px auto;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .tile {
             width: 60px;
             height: 60px;
-            border: 2px solid #999;
+            border: 2px solid #ccc;
             font-size: 30px;
             line-height: 60px;
             text-transform: uppercase;
+            font-weight: bold;
+            transition: background-color 0.5s;
         }
         .correct {
             background-color: #6aaa64; /* green */
+            border-color: #6aaa64;
             color: white;
         }
         .present {
             background-color: #c9b458; /* yellow */
+            border-color: #c9b458;
             color: white;
         }
         .absent {
             background-color: #787c7e; /* grey */
+            border-color: #787c7e;
             color: white;
         }
-        #messageDisplay {
-            color: red; /* Make error messages stand out */
-            min-height: 24px; /* Prevent UI shift */
-            margin-bottom: 10px;
+        input, button {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        button:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
 
-<h1>Wordle with a Friend</h1>
+<h1>Wordle Duel</h1>
 
-<h2 id="messageDisplay"></h2> 
+<div id="header-container">
+    <h2 id="roomDisplay">Room: Not Connected</h2>
+    <div id="score-status-container">
+        <h3 id="scoreDisplay">Scores:</h3>
+        <h3 id="gameStatus">Enter username to start.</h3>
+    </div>
+    <div id="messageDisplay"></div>
+</div>
 
-<input id="usernameInput" placeholder="Enter Your Username">
-<br><br>
+
+<input id="usernameInput" placeholder="Enter Your Username (REQUIRED)">
+<br>
 
 <input id="secretWordInput" placeholder="Set 5 letter secret word">
-<button id="createRoom">Set Word and Create Room</button>
-<br><br>
+<button id="createRoomBtn">Set Word and Create/Next Round</button>
+<br>
 
 <input id="roomInput" placeholder="Room Code">
 <button id="joinRoomBtn">Join Room</button>
-
-<h2 id="roomDisplay"></h2>
 
 <div id="board"></div>
 

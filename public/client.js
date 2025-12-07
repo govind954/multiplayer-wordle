@@ -15,20 +15,18 @@ const MAX_WORD_LENGTH = 5;
 // --- DOM References ---
 const lobbyControls = document.getElementById("lobby-controls");
 const gameContainer = document.getElementById("game-container");
-const setWordControls = document.getElementById("setWordControls"); // NEW
+const setWordControls = document.getElementById("setWordControls");
 
 // --- INITIAL SETUP ---
 document.getElementById("board").innerHTML =
   Array(30).fill(0).map(() => `<div class="tile"></div>`).join("");
 
-// Event listener for the physical keyboard
+// Event listeners for keyboard input
 document.addEventListener('keydown', (event) => {
     if (isMyTurnToGuess) {
         processKey(event.key.toUpperCase());
     }
 });
-
-// Event listener for the virtual keyboard
 document.getElementById('keyboard').addEventListener('click', (event) => {
     if (event.target.classList.contains('key') && isMyTurnToGuess) {
         processKey(event.target.dataset.key);
@@ -54,9 +52,7 @@ function showLobby() {
 
 function processKey(key) {
     if (!isMyTurnToGuess) return;
-
     const letter = key.length === 1 && key.match(/[A-Z]/);
-
     if (letter && currentGuess.length < MAX_WORD_LENGTH) {
         currentGuess += key;
         updateBoardInput(currentGuess);
@@ -78,7 +74,6 @@ function updateBoardInput(guess) {
         board[startTileIndex + i].innerText = "";
         board[startTileIndex + i].classList.remove('flip-in', 'flip-out', 'correct', 'present', 'absent'); 
     }
-
     for (let i = 0; i < guess.length; i++) {
         board[startTileIndex + i].innerText = guess[i];
     }
@@ -141,50 +136,49 @@ function updateGameUI(isWordSet = true) {
     
     // --- Determine State ---
     if (isMyTurnToSet) {
-        // Show set word controls
+        // Setter's turn: Show set word controls
         setWordControls.style.display = 'block';
         secretWordInput.disabled = false;
         setNextWordBtn.disabled = false;
         
-        // Hide game board and show status
         statusEl.innerText = "YOUR TURN: Set the secret word (5 letters)!";
         
     } else if (isMyTurnToGuess) {
         if (isWordSet) { 
-             // Show keyboard for guessing
+             // Guesser's turn: Word is set, enable keyboard
              keyboardEl.style.opacity = 1;
              statusEl.innerText = "YOUR TURN: Guess the word using your keyboard!";
         } else {
-            // Wait for opponent to set word
+            // Guesser waiting for Setter
             statusEl.innerText = `Opponent is setting the word...`;
             keyboardEl.style.opacity = 0.2;
         }
     } else if (room) {
+        // Creator waiting for a joiner
         statusEl.innerText = "Waiting for opponent to join..."; 
     }
 }
 
 
-// --- Handlers for User Actions (Updated to reference new button ID) ---
+// --- Handlers for User Actions ---
 
-// This handler now ONLY deals with creating the room for the very first time.
+// Handles both Create and Join based on if roomInput is empty
 document.getElementById("joinRoomBtn").onclick = () => {
     const username = document.getElementById("usernameInput").value.trim();
     const roomCode = document.getElementById("roomInput").value.toUpperCase();
     
     if (!username || username.length < 3) return displayMessage("Please enter a username (3+ letters).");
-    // If the room code is empty, we assume they want to CREATE the room.
+    
+    // Logic for CREATING a room
     if (!roomCode) {
-        // They are creating the room. We need a dummy word here for the server to process.
-        // The *actual* word is set via the setNextWordBtn logic later.
-        socket.emit("createRoom", { secretWord: "START", username }); 
+        socket.emit("createRoom", { username }); 
     } else {
-        // They are joining an existing room
+        // Logic for JOINING a room
         socket.emit("joinRoom", { code: roomCode, username });
     }
 };
 
-// NEW Handler for setting the word after the first round, or initial word set
+// Handler for setting the word (used after room creation and after every round)
 document.getElementById("setNextWordBtn").onclick = () => {
     const secretWord = document.getElementById("secretWordInput").value.trim();
     
@@ -209,11 +203,12 @@ socket.on("roomCreated", (code, socketId, userList) => {
     mySocketId = socketId;
     usernames = userList;
     isMyTurnToSet = true; // Creator is the first Setter
+    isMyTurnToGuess = false;
     
     showGame(); 
     updateRoomDisplay();
-    // Pass true for isWordSet status to show the Setter controls immediately
-    updateGameUI(true); 
+    // CRITICAL: Call updateGameUI with isWordSet=false so SETTER controls appear
+    updateGameUI(false); 
     displayMessage(`Room created! Share code: ${code}`);
 });
 
@@ -225,12 +220,12 @@ socket.on("joinedRoom", (code, socketId, userList) => {
     
     showGame(); 
     updateRoomDisplay();
-    updateGameUI(true); // Game starts immediately upon join
-    displayMessage(`Joined room: ${code}. Game is starting!`);
+    // When the second player joins, the game still needs the word set.
+    updateGameUI(false); 
+    displayMessage(`Joined room: ${code}. Waiting for word set...`);
 });
 
 socket.on("gameStart", ({ setter, guesser, usernames: newUsers }) => {
-    // Update usernames globally
     usernames = newUsers; 
     
     isMyTurnToSet = (mySocketId === setter);
@@ -238,8 +233,7 @@ socket.on("gameStart", ({ setter, guesser, usernames: newUsers }) => {
     updateScoreDisplay({});
     resetBoard();
     resetKeyboard();
-    // The game starts, meaning the word is set (either START or a real word)
-    updateGameUI(true); 
+    updateGameUI(true); // Word is now guaranteed to be set, so start guessing UI for the guesser
     displayMessage(`Game started! ${usernames[setter]} is the setter. ${usernames[guesser]} guesses first.`);
 });
 
@@ -247,7 +241,7 @@ socket.on("wordSet", ({ setterId }) => {
     isMyTurnToSet = (mySocketId === setterId);
     isMyTurnToGuess = (mySocketId !== setterId);
     resetBoard();
-    updateGameUI(true); // Word is now set, so start guessing UI
+    updateGameUI(true); 
     displayMessage("New secret word set! It's time to guess!");
 });
 
@@ -255,19 +249,15 @@ socket.on("result", ({ guess, feedback }) => {
     let board = document.querySelectorAll(".tile");
     updateKeyboardDisplay(feedback, guess);
 
-    // Apply the staggered flip animation 
     for (let i = 0; i < MAX_WORD_LENGTH; i++) {
         const tile = board[currentRow * MAX_WORD_LENGTH + i];
-        
         tile.innerText = guess[i];
         
         setTimeout(() => {
             tile.classList.add('flip-in'); 
-            
             setTimeout(() => {
                 tile.classList.add(feedback[i], 'flip-out'); 
             }, 300); 
-            
         }, i * 350); 
     }
     
@@ -292,18 +282,15 @@ socket.on("gameOver", ({ winnerId, newSetterId, scores, usernames: newUsers, los
     }
     displayMessage(message, 5000);
     
-    // Wait for animation, then reset and prepare for the next round
     setTimeout(() => {
         isMyTurnToSet = (mySocketId === newSetterId);
         isMyTurnToGuess = (mySocketId !== newSetterId);
         resetBoard();
         resetKeyboard();
-        updateGameUI(false); // New word is NOT set yet, must wait for Setter
+        updateGameUI(false); // Prepare new setter
     }, 2000); 
 });
 
-
-// --- Error Handlers ---
 socket.on("errorMsg", (message) => displayMessage("Error: " + message)); 
 socket.on("roomNotFound", () => displayMessage("Room not found. Check the code.")); 
 socket.on("roomFull", () => displayMessage("This room is already full.")); 

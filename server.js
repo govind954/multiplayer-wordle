@@ -8,12 +8,32 @@ app.use(express.static("public"));
 let rooms = {};
 let users = {}; // Global user tracking by socket ID
 
-// --- Temporary/Example Word List ---
-// IMPORTANT: Replace this small list with a massive array of 5-letter words (5000+)
-const VALID_WORDS = [
-    "ADIEU", "APPLE", "BEACH", "CHAIR", "TABLE", "PLANT", "START", "WORLD", 
-    "RIVER", "TRAIN", "HOUSE", "GRADE", "SMILE", "QUIET", "BLANK"
-];
+// --- Word List Integration (FIXED) ---
+let VALID_WORDS = [];
+try {
+    const fileContent = fs.readFileSync('valid_words.txt', 'utf8');
+    
+    VALID_WORDS = fileContent
+        // 1. Convert to UPPERCASE
+        .toUpperCase()
+        // 2. NEW FIX: Replace ALL carriage returns (\r) with nothing. This ensures clean newlines.
+        .replace(/\r/g, '') 
+        // 3. Split by newline (\n)
+        .split('\n') 
+        // 4. Trim any remaining whitespace (including extra spaces or tabs) and filter to length 5
+        .map(word => word.trim())
+        .filter(word => word.length === 5);
+    
+    console.log(`Loaded ${VALID_WORDS.length} valid 5-letter words.`);
+} catch (error) {
+    console.error("Error loading valid_words.txt:", error.message);
+    console.error("Using a small default list. Make sure the file exists and is readable.");
+    // Fallback list
+    VALID_WORDS = [
+        "ADIEU", "APPLE", "BEACH", "CHAIR", "TABLE", "PLANT", "START", "WORLD", 
+        "RIVER", "TRAIN", "HOUSE", "GRADE", "SMILE", "QUIET", "BLANK"
+    ];
+}
 // ------------------------------------
 
 function generateCode() {

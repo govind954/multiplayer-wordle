@@ -71,21 +71,40 @@
             line-height: 60px;
             text-transform: uppercase;
             font-weight: bold;
-            transition: background-color 0.5s, transform 0.2s;
+            /* Animation Setup */
+            transition: transform 0.3s ease-in-out, background-color 0.5s;
+            transform-style: preserve-3d;
+            position: relative;
         }
-        /* COLOR CLASSES (Used for both Tiles and Keyboard) */
+        /* TILE ANIMATION KEYFRAMES (THE POLISH) */
+        .flip-in {
+            animation: flipIn 0.3s ease-in forwards;
+        }
+        .flip-out {
+             animation: flipOut 0.3s 0.3s ease-out forwards; /* 0.3s delay for two-stage flip */
+        }
+        @keyframes flipIn {
+            0% { transform: rotateX(0deg); }
+            100% { transform: rotateX(90deg); }
+        }
+        @keyframes flipOut {
+            0% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+        
+        /* COLOR CLASSES */
         .correct {
-            background-color: #6aaa64; /* green */
+            background-color: #6aaa64;
             border-color: #6aaa64;
             color: white;
         }
         .present {
-            background-color: #c9b458; /* yellow */
+            background-color: #c9b458;
             border-color: #c9b458;
             color: white;
         }
         .absent {
-            background-color: #787c7e; /* grey */
+            background-color: #787c7e;
             border-color: #787c7e;
             color: white;
         }
@@ -107,7 +126,6 @@
             background-color: #adb5bd;
             cursor: not-allowed;
         }
-
         /* VIRTUAL KEYBOARD STYLES */
         #keyboard {
             max-width: 500px;
@@ -134,7 +152,7 @@
             transition: background-color 0.2s;
         }
         .key.big {
-            max-width: 60px; /* Wider for Enter/Delete */
+            max-width: 60px;
         }
     </style>
 </head>
@@ -204,6 +222,8 @@
         <button class="key big" data-key="BACKSPACE">DELETE</button>
     </div>
 </div>
+
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js"></script>
 

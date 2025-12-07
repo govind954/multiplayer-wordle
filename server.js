@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
         users[socketId] = username;
 
         rooms[code] = { 
-            word: secretWord.toUpperCase(), // Store word in uppercase
+            word: secretWord.toUpperCase(),
             players: [socketId],
             usernames: { [socketId]: username },
             scores: { [socketId]: 0 }, 
@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
             roomData.players.push(socketId);
             roomData.usernames[socketId] = username;
             roomData.scores[socketId] = 0;
-            roomData.guesserId = socketId; // Joiner is the first guesser
+            roomData.guesserId = socketId;
             
             socket.join(code);
             socket.emit("joinedRoom", code, socketId, roomData.usernames);
@@ -85,7 +85,6 @@ io.on("connection", (socket) => {
         }
     });
 
-    // New handler for the next round's word setting
     socket.on("setNextWord", ({ room, secretWord }) => {
         const roomData = rooms[room];
         if (roomData && socketId === roomData.setterId) {
@@ -95,7 +94,6 @@ io.on("connection", (socket) => {
             
             roomData.word = secretWord.toUpperCase();
             roomData.guessCount = 0;
-            // Notify clients that the word is set, guesser can start
             io.to(room).emit("wordSet", { setterId: roomData.setterId, newGuesserId: roomData.guesserId });
         }
     });
@@ -108,7 +106,6 @@ io.on("connection", (socket) => {
         
         const correct = roomData.word;
         
-        // CRITICAL FIX: Check if the word is set (not null)
         if (!correct) {
             socket.emit("errorMsg", "The secret word has not been set for this round yet.");
             return;
@@ -123,27 +120,24 @@ io.on("connection", (socket) => {
 
         if (isCorrect || roomData.guessCount >= 6) {
             
-            // GAME OVER LOGIC
             let winnerId = null;
             if (isCorrect) {
-                // Scoring: 6 points for guess 1, 1 point for guess 6
                 roomData.scores[socketId] += (7 - roomData.guessCount);
                 winnerId = socketId;
             }
 
-            // Determine next turn: roles flip
             const newSetterId = roomData.guesserId; 
             const newGuesserId = roomData.setterId; 
 
-            // Reset room state for the next turn
             roomData.setterId = newSetterId;
             roomData.guesserId = newGuesserId;
-            roomData.word = null; // Forces the new setter to input a word
+            roomData.word = null;
 
             io.to(room).emit("gameOver", { 
                 winnerId: winnerId, 
                 newSetterId: newSetterId,
                 scores: roomData.scores,
+                usernames: roomData.usernames, // <--- FIX: Send current usernames list
                 lostOnGuessCount: roomData.guessCount >= 6 && !isCorrect
             });
         }
@@ -151,7 +145,20 @@ io.on("connection", (socket) => {
     
     socket.on('disconnect', () => {
         delete users[socketId]; 
-        // Disconnect logic for rooms...
+        for (const code in rooms) {
+            const index = rooms[code].players.indexOf(socketId);
+            if (index > -1) {
+                rooms[code].players.splice(index, 1);
+                delete rooms[code].usernames[socketId];
+                delete rooms[code].scores[socketId];
+                
+                if (rooms[code].players.length === 0) {
+                    delete rooms[code];
+                } else {
+                    io.to(code).emit("opponentLeft");
+                }
+            }
+        }
     });
 
 });

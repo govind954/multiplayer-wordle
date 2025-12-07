@@ -3,7 +3,8 @@
 <head>
     <title>Wordle Duel</title>
     <style>
-        /* GLOBAL STYLES */
+        /* (CSS STYLES REMAINS THE SAME - NO NEED TO CHANGE THE STYLE BLOCK) */
+        /* ... CSS is here (removed for brevity, but keep it in your file) ... */
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
@@ -15,7 +16,6 @@
             color: #202020;
             margin-bottom: 10px;
         }
-        /* HEADER CONTAINER */
         #header-container {
             width: 90%;
             max-width: 600px;
@@ -51,7 +51,6 @@
             min-height: 20px;
             margin-bottom: 10px;
         }
-        /* GAME BOARD */
         #board {
             display: grid;
             grid-template-columns: repeat(5, 60px);
@@ -71,12 +70,10 @@
             line-height: 60px;
             text-transform: uppercase;
             font-weight: bold;
-            /* Animation Setup */
             transition: transform 0.3s ease-in-out, background-color 0.5s;
             transform-style: preserve-3d;
             position: relative;
         }
-        /* TILE ANIMATION KEYFRAMES */
         .flip-in {
             animation: flipIn 0.3s ease-in forwards;
         }
@@ -92,7 +89,6 @@
             100% { transform: rotateX(0deg); }
         }
         
-        /* COLOR CLASSES */
         .correct {
             background-color: #6aaa64;
             border-color: #6aaa64;
@@ -108,7 +104,6 @@
             border-color: #787c7e;
             color: white;
         }
-        /* CONTROLS */
         input, button {
             padding: 8px 12px;
             margin: 5px;
@@ -126,7 +121,6 @@
             background-color: #adb5bd;
             cursor: not-allowed;
         }
-        /* VIRTUAL KEYBOARD STYLES */
         #keyboard {
             max-width: 500px;
             margin: 20px auto;
@@ -172,18 +166,18 @@
 <div id="lobby-controls">
     <input id="usernameInput" placeholder="Enter Your Username (REQUIRED)">
     <br>
-    <input id="secretWordInput" placeholder="Set 5 letter secret word" maxlength="5">
-    <button id="createRoomBtn">Set Word and Create/Next Round</button>
-    <br>
     <input id="roomInput" placeholder="Room Code" maxlength="5">
     <button id="joinRoomBtn">Join Room</button>
 </div>
 
 <div id="game-container" style="display:none;"> 
-    <div id="board"></div>
+    
+    <div id="setWordControls" style="margin-bottom: 20px; display: none;">
+        <input id="secretWordInput" placeholder="Set 5 letter secret word" maxlength="5">
+        <button id="setNextWordBtn">Set Word for Next Round</button>
+    </div>
 
-    <input id="guessInput" type="hidden"> 
-    <button id="guessBtn" style="display:none;">Guess</button> 
+    <div id="board"></div>
 
     <div id="keyboard">
         <div class="keyboard-row">

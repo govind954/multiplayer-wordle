@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
         users[socketId] = username;
 
         rooms[code] = { 
-            word: secretWord.toUpperCase(),
+            word: null, // <-- INITIAL WORD IS NOW NULL
             players: [socketId],
             usernames: { [socketId]: username },
             scores: { [socketId]: 0 }, 

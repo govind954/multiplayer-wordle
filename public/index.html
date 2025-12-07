@@ -35,20 +35,28 @@
             background-color: #787c7e; /* grey */
             color: white;
         }
+        #messageDisplay {
+            color: red; /* Make error messages stand out */
+            min-height: 24px; /* Prevent UI shift */
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
 <h1>Wordle with a Friend</h1>
 
-<h3 id="scoreDisplay">Scores: Wait for players to join...</h3>
-<h3 id="gameStatus"></h3>
-<h2 id="messageDisplay" style="color: red;"></h2> <input id="secretWordInput" placeholder="Set 5 letter secret word">
-<button id="createRoom">Set Word and Start/Next Round</button>
+<h2 id="messageDisplay"></h2> 
+
+<input id="usernameInput" placeholder="Enter Your Username">
+<br><br>
+
+<input id="secretWordInput" placeholder="Set 5 letter secret word">
+<button id="createRoom">Set Word and Create Room</button>
 <br><br>
 
 <input id="roomInput" placeholder="Room Code">
-<button id="joinRoom">Join Room</button>
+<button id="joinRoomBtn">Join Room</button>
 
 <h2 id="roomDisplay"></h2>
 
